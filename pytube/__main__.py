@@ -117,6 +117,8 @@ class YouTube(object):
                 self.watch_html,
             )['args']
 
+        if 'title' not in self.player_config_args:
+            self.player_config_args['title'] = self.video_id
         self.vid_descr = extract.get_vid_descr(self.watch_html)
         # https://github.com/nficano/pytube/issues/165
         stream_maps = ['url_encoded_fmt_stream_map']
