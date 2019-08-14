@@ -7,7 +7,6 @@ of the signature to the client, along with the decryption algorithm obfuscated
 in JavaScript. For the clients to play the videos, JavaScript must take the
 ciphered version, cycle it through a series of "transform functions," and then
 signs the media URL with the output.
-
 This module is responsible for (1) finding and extracting those "transform
 functions" (2) maps them to Python equivalents and (3) taking the ciphered
 signature and decoding it.
@@ -34,14 +33,18 @@ def get_initial_function_name(js):
         The contents of the base.js asset file.
 
     """
-    # c&&d.set("signature", EE(c));
     pattern = [
-        r'yt\.akamaized\.net/\)\s*\|\|\s*'
-        r'.*?\s*c\s*&&\s*d\.set\([^,]+\s*,\s*(?:encodeURIComponent'
-        r'\s*\()?(?P<sig>[a-zA-Z0-9$]+)\(',
+        r'\b[cs]\s*&&\s*[adf]\.set\([^,]+\s*,\s*encodeURIComponent\s*\(\s*(?P<sig>[a-zA-Z0-9$]+)\(',
+        r'\b[a-zA-Z0-9]+\s*&&\s*[a-zA-Z0-9]+\.set\([^,]+\s*,\s*encodeURIComponent\s*\(\s*(?P<sig>[a-zA-Z0-9$]+)\(',
+        r'(?P<sig>[a-zA-Z0-9$]+)\s*=\s*function\(\s*a\s*\)\s*{\s*a\s*=\s*a\.split\(\s*""\s*\)',
+        r'(["\'])signature\1\s*,\s*(?P<sig>[a-zA-Z0-9$]+)\(',
         r'\.sig\|\|(?P<sig>[a-zA-Z0-9$]+)\(',
-        r'\bc\s*&&\s*d\.set\([^,]+\s*,\s*(?:encodeURIComponent'
-        r'\s*\()?(?P<sig>[a-zA-Z0-9$]+)\(',
+        r'yt\.akamaized\.net/\)\s*\|\|\s*.*?\s*[cs]\s*&&\s*[adf]\.set\([^,]+\s*,\s*(?:encodeURIComponent\s*\()?\s*(?P<si$',
+        r'\b[cs]\s*&&\s*[adf]\.set\([^,]+\s*,\s*(?P<sig>[a-zA-Z0-9$]+)\(',
+        r'\b[a-zA-Z0-9]+\s*&&\s*[a-zA-Z0-9]+\.set\([^,]+\s*,\s*(?P<sig>[a-zA-Z0-9$]+)\(',
+        r'\bc\s*&&\s*a\.set\([^,]+\s*,\s*\([^)]*\)\s*\(\s*(?P<sig>[a-zA-Z0-9$]+)\(',
+        r'\bc\s*&&\s*[a-zA-Z0-9]+\.set\([^,]+\s*,\s*\([^)]*\)\s*\(\s*(?P<sig>[a-zA-Z0-9$]+)\(',
+        r'\bc\s*&&\s*[a-zA-Z0-9]+\.set\([^,]+\s*,\s*\([^)]*\)\s*\(\s*(?P<sig>[a-zA-Z0-9$]+)\('
     ]
     logger.debug('finding initial function name')
     return regex_search(pattern, js, group=1)
